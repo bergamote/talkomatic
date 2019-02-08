@@ -1,0 +1,17 @@
+cat
+book
+diner
+bear
+plane
+bike
+president
+cheese
+giraffe
+shoe
+orchid
+cigarette
+ambulance
+treasure
+heart
+cake
+aubergine

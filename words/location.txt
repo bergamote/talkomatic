@@ -1,0 +1,5 @@
+fountain
+desert
+forest
+tower
+sea

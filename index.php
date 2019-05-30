@@ -1,5 +1,8 @@
 <head>
   <meta charset="utf-8">
+  <title>
+    Talkomatic
+  </title>
   <meta name="viewport" content="width=device-width">
   <style>
     body {

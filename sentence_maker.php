@@ -1,9 +1,10 @@
 <?php
 # Make word arrays from text files
-$s = file("words/subject.txt", FILE_IGNORE_NEW_LINES);
-$v = file("words/verb.txt", FILE_IGNORE_NEW_LINES);
-$ar = file("words/article.txt", FILE_IGNORE_NEW_LINES);
-$n = file("words/noun.txt", FILE_IGNORE_NEW_LINES);
+$s_file = file("words/subject.txt", FILE_IGNORE_NEW_LINES);
+$v_file = file("words/verb.txt", FILE_IGNORE_NEW_LINES);
+$ar_file = file("words/article.txt", FILE_IGNORE_NEW_LINES);
+$n_file = file("words/noun.txt", FILE_IGNORE_NEW_LINES);
+$loc_file = file("words/location.txt", FILE_IGNORE_NEW_LINES);
 
 # Function to pick random words from array
 function pick($x){
@@ -23,57 +24,72 @@ $vowels = array(
 $special_verb_endings = array (
   "x",
   "y",
-  "o"
+  "o",
+  "h"
 );
 
-# Starting to make our sentence
+# Adapt article (a / an)
+function adapt_article($article, $noun) {
+  global $vowels;
+  $nFirstChar = $noun[0];
+  if (($article == "a") and
+    (in_array($nFirstChar, $vowels))) {
+    return "an";
+  } else {
+    return $article;
+  }
+}
+
+# Check for third person 
+function check_third_person($s) {
+  if (( $s == "he" ) or ( $s == "she" )){
+    return true; 
+  } else { 
+    return false;
+  }
+}
+
+# Conjugate verb (when third person, present continous)
+function conjugate($subject ,$verb) {
+  global $vowels, $special_verb_endings;
+  if (check_third_person($subject)){
+    # If third person, find out the last two letters of the verb
+    $verb_ending = "";
+    $vLastChar = $verb[strlen($verb)-1];
+    $vPenulChar = $verb[strlen($verb)-2];
+    if (($vLastChar == "y") and
+      in_array( $vPenulChar , $vowels )) {
+      # When verb ends with [vowel]-[y] do nothing
+    } elseif (in_array($vLastChar, $special_verb_endings)) {
+      if ($vLastChar == "y") {
+          # Otherwise replace [y] for [i]
+          $verb = substr( $verb , 0 , -1 )."i";
+        }
+      # Special verb endings take [e]
+      $verb_ending .= "e";
+    }
+    # Every verb takes [s]
+    $verb_ending .= "s";
+    $verb .= $verb_ending;
+  }
+  return $verb;
+}
+
+
+### Starting to make our sentence
 
 # Pick a subject
-$subject = pick($s);
+$subject = pick($s_file);
 
-# check if third person test
-if (($subject=="he") or ($subject=="she")){
-  $third_person = true;
-} else {
-  $third_person = false;
-}
-
-# Pick a verb
-$verb = pick($v);
-
-# Conjugate verb (third person present continous)
-if ($third_person){
-  $verb_ending = "";
-  $vLastChar = $verb[strlen($verb)-1];
-  $vPenulChar = $verb[strlen($verb)-2];
-  if (($vLastChar == "y") and
-    in_array($vPenulChar, $vowels)) {
-    # When verb ends with [vowel]-[y] do nothing
-  } elseif (in_array($vLastChar, $special_verb_endings)) {
-    if ($vLastChar == "y") {
-        # Otherwise replace [y] for [i]
-        $verb = substr($verb, 0, -1)."i";
-      }
-    # Special verb endings take [e]
-    $verb_ending .= "e";
-  }
-  # Every verb takes [s]
-  $verb_ending .= "s";
-  $verb .= $verb_ending;
-}
-
-# Pick an article
-$article = pick($ar);
+# Pick and conjugate the verb
+$verb = conjugate( $subject , pick($v_file) );
 
 # Pick a noun
-$noun = pick($n);
+$noun = pick($n_file);
 
-# Adapt article
-$nFirstChar = $noun[0];
-if (($article == "a") and
-  (in_array($nFirstChar, $vowels))) {
-  $article = "an";
-}
+# Pick and adapt the article
+$article = adapt_article( pick($ar_file) , $noun );
+
 
 # Make an array of words
 $sentence_array = array (
@@ -85,7 +101,7 @@ $sentence_array = array (
 
 # Put the words together around spaces
 # removing the last space
-$sentence = trim(implode($sentence_array, " "));
+$sentence = trim(implode( $sentence_array , " " ));
 
 # Capitalize and add period
 echo ucfirst($sentence).".";

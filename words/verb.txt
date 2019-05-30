@@ -18,3 +18,5 @@ fly
 dry
 pray
 sing
+adjust
+push
